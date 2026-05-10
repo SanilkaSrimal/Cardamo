@@ -168,7 +168,7 @@ export default function LeafDiseaseScreen() {
     </View>
   );
 }
-//chane ui
+//chane ui for all
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   navBar: {
