@@ -1,0 +1,28 @@
+{
+  "model_file": "best_cardamom_grade_fixed.keras",
+  "architecture": "EfficientNetB0",
+  "img_size": [
+    224,
+    224
+  ],
+  "crop_pad_ratio": 0.25,
+  "label_smoothing": 0.08,
+  "class_names": [
+    "Cardmom Grade A",
+    "Cardmom Grade B",
+    "Cardmom Grade C"
+  ],
+  "train_counts": {
+    "Cardmom Grade A": 627,
+    "Cardmom Grade B": 588,
+    "Cardmom Grade C": 807
+  },
+  "class_weight": {
+    "Cardmom Grade A": 1.0749601275917064,
+    "Cardmom Grade B": 1.1462585034013606,
+    "Cardmom Grade C": 0.8351920693928129
+  },
+  "test_accuracy": 0.9448275566101074,
+  "test_loss": 0.38162553310394287,
+  "server_note": "After deploy, set pad = int(max(w, h) * 0.25) + 20 in main.py detect_pod_crop_and_measure (must match CROP_PAD_RATIO)."
+}
