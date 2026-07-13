@@ -1,0 +1,152 @@
+{
+  "gate_type": "other_leaf_plantvillage",
+  "class_names": [
+    "Apple___Apple_scab",
+    "Apple___Black_rot",
+    "Apple___Cedar_apple_rust",
+    "Apple___healthy",
+    "Blueberry___healthy",
+    "Cherry_(including_sour)___Powdery_mildew",
+    "Cherry_(including_sour)___healthy",
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "Corn_(maize)___Common_rust_",
+    "Corn_(maize)___Northern_Leaf_Blight",
+    "Corn_(maize)___healthy",
+    "Grape___Black_rot",
+    "Grape___Esca_(Black_Measles)",
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "Grape___healthy",
+    "Orange___Haunglongbing_(Citrus_greening)",
+    "Peach___Bacterial_spot",
+    "Peach___healthy",
+    "Pepper,_bell___Bacterial_spot",
+    "Pepper,_bell___healthy",
+    "Potato___Early_blight",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Raspberry___healthy",
+    "Soybean___healthy",
+    "Squash___Powdery_mildew",
+    "Strawberry___Leaf_scorch",
+    "Strawberry___healthy",
+    "Tomato___Bacterial_spot",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Tomato___Leaf_Mold",
+    "Tomato___Septoria_leaf_spot",
+    "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "Tomato___Tomato_mosaic_virus",
+    "Tomato___healthy"
+  ],
+  "image_size": [
+    224,
+    224
+  ],
+  "suggested_threshold": 0.43,
+  "val_precision_at_threshold": 0.9678,
+  "inference_rule": {
+    "reject_as_other_leaf_when": "max(softmax) >= suggested_threshold",
+    "pass_to_disease_model_when": "max(softmax) < suggested_threshold"
+  },
+  "history": {
+    "phase1": {
+      "accuracy": [
+        0.703166663646698,
+        0.8839166760444641,
+        0.909250020980835,
+        0.921500027179718,
+        0.9304166436195374,
+        0.9334999918937683,
+        0.9394999742507935,
+        0.9424999952316284
+      ],
+      "loss": [
+        1.2700468301773071,
+        0.5049515962600708,
+        0.3706495761871338,
+        0.31103694438934326,
+        0.269025057554245,
+        0.24262648820877075,
+        0.22333943843841553,
+        0.2039308100938797
+      ],
+      "val_accuracy": [
+        0.8788213729858398,
+        0.9022713303565979,
+        0.9114794135093689,
+        0.9205647706985474,
+        0.9265807271003723,
+        0.9427869915962219,
+        0.9518722891807556,
+        0.9556783437728882
+      ],
+      "val_loss": [
+        0.5794444680213928,
+        0.4011878967285156,
+        0.32678669691085815,
+        0.3005208969116211,
+        0.2539628744125366,
+        0.2131734937429428,
+        0.18223881721496582,
+        0.16718487441539764
+      ],
+      "learning_rate": [
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513
+      ]
+    },
+    "phase2": {
+      "accuracy": [
+        0.8452500104904175,
+        0.9042500257492065,
+        0.921750009059906
+      ],
+      "loss": [
+        0.5788105726242065,
+        0.36465731263160706,
+        0.29528430104255676
+      ],
+      "val_accuracy": [
+        0.9554327726364136,
+        0.9501534700393677,
+        0.9495396018028259
+      ],
+      "val_loss": [
+        0.1764790266752243,
+        0.1752593070268631,
+        0.1710725873708725
+      ],
+      "learning_rate": [
+        9.999999747378752e-06,
+        9.999999747378752e-06,
+        4.999999873689376e-06
+      ]
+    }
+  },
+  "train_args": {
+    "output_dir": "/content/models/leaf_gate",
+    "cache_dir": "/content/_plantvillage_cache",
+    "epochs": 8,
+    "finetune_epochs": 4,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "finetune_lr": 1e-05,
+    "max_samples": 12000,
+    "val_split": 0.15,
+    "seed": 42
+  },
+  "notes": [
+    "This model does NOT classify cardamom.",
+    "It only recognizes common non-cardamom crop leaves from PlantVillage.",
+    "PlantVillage has no mango class; mango may still slip through until you add mango negatives later.",
+    "Keep using your existing cardamom disease TFLite for diagnosis."
+  ]
+}
