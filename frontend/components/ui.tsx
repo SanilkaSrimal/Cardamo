@@ -217,3 +217,272 @@ export function Badge({
   tone = "brand",
   style,
 }: {
+  label: string;
+  tone?: "brand" | "spice" | "danger" | "warn" | "neutral";
+  style?: StyleProp<ViewStyle>;
+}) {
+  const tones: Record<string, { bg: string; fg: string }> = {
+    brand: { bg: colors.brand50, fg: colors.brand700 },
+    spice: { bg: colors.spice50, fg: colors.spice600 },
+    danger: { bg: colors.danger50, fg: colors.danger700 },
+    warn: { bg: colors.warn50, fg: colors.warn800 },
+    neutral: { bg: colors.surfaceAlt, fg: colors.inkSoft },
+  };
+  const c = tones[tone] ?? tones.brand;
+
+  return (
+    <View style={[badge.wrap, { backgroundColor: c.bg }, style]}>
+      <Text style={[badge.text, { color: c.fg }]}>{label}</Text>
+    </View>
+  );
+}
+
+const badge = StyleSheet.create({
+  wrap: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+    alignSelf: "flex-start",
+  },
+  text: {
+    fontSize: 10.5,
+    fontWeight: "800",
+    letterSpacing: 0.7,
+    textTransform: "uppercase",
+  },
+});
+
+/* ────────────────────────────────────────────────────────────────
+ * Buttons
+ * ──────────────────────────────────────────────────────────────── */
+
+export function PrimaryButton({
+  label,
+  onPress,
+  loading,
+  disabled,
+  icon,
+  tone = "brand",
+  style,
+}: {
+  label: string;
+  onPress?: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  icon?: React.ReactNode;
+  tone?: "brand" | "dark" | "danger" | "light";
+  style?: StyleProp<ViewStyle>;
+}) {
+  const tones: Record<string, { bg: string; fg: string }> = {
+    brand: { bg: colors.brand900, fg: colors.white },
+    dark: { bg: colors.ink, fg: colors.white },
+    danger: { bg: colors.danger, fg: colors.white },
+    light: { bg: colors.white, fg: colors.brand900 },
+  };
+  const c = tones[tone] ?? tones.brand;
+  const isDisabled = disabled || loading;
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={isDisabled}
+      activeOpacity={0.85}
+      style={[
+        btn.base,
+        { backgroundColor: c.bg },
+        isDisabled && btn.disabled,
+        shadow.soft,
+        style,
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={c.fg} />
+      ) : (
+        <>
+          <Text style={[btn.label, { color: c.fg }]}>{label}</Text>
+          {icon}
+        </>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+export function GhostButton({
+  label,
+  onPress,
+  icon,
+  style,
+  textStyle,
+}: {
+  label: string;
+  onPress?: () => void;
+  icon?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={[btn.ghost, style]}
+    >
+      {icon}
+      <Text style={[btn.ghostLabel, textStyle]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+const btn = StyleSheet.create({
+  base: {
+    borderRadius: radius.lg,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  disabled: { opacity: 0.55 },
+  label: {
+    fontSize: 13,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  ghost: {
+    borderRadius: radius.lg,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  ghostLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.inkSoft,
+  },
+});
+
+/* ────────────────────────────────────────────────────────────────
+ * Section header
+ * ──────────────────────────────────────────────────────────────── */
+
+export function SectionTitle({
+  title,
+  action,
+  onAction,
+  style,
+}: {
+  title: string;
+  action?: string;
+  onAction?: () => void;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[sec.row, style]}>
+      <Text style={sec.title}>{title}</Text>
+      {action && (
+        <TouchableOpacity onPress={onAction} activeOpacity={0.7}>
+          <Text style={sec.action}>{action}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+const sec = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  title: { ...t.title },
+  action: { color: colors.brand700, fontWeight: "700", fontSize: 13 },
+});
+
+/* ────────────────────────────────────────────────────────────────
+ * Empty state
+ * ──────────────────────────────────────────────────────────────── */
+
+export function EmptyState({
+  icon,
+  title,
+  message,
+  style,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  message?: string;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return (
+    <View style={[empty.wrap, style]}>
+      {icon && (
+        <IconTile size={58} tone="brand" style={{ marginBottom: 14 }}>
+          {icon}
+        </IconTile>
+      )}
+      <Text style={empty.title}>{title}</Text>
+      {message && <Text style={empty.message}>{message}</Text>}
+    </View>
+  );
+}
+
+const empty = StyleSheet.create({
+  wrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 36,
+    paddingHorizontal: 24,
+    borderRadius: radius.xl,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    backgroundColor: colors.white,
+  },
+  title: { ...t.subtitle, textAlign: "center" },
+  message: { ...t.small, textAlign: "center", marginTop: 6 },
+});
+
+/* ────────────────────────────────────────────────────────────────
+ * Progress bar
+ * ──────────────────────────────────────────────────────────────── */
+
+export function ProgressBar({
+  value,
+  tone = colors.brand600,
+  track = colors.surfaceAlt,
+  height = 7,
+}: {
+  value: number;
+  tone?: string;
+  track?: string;
+  height?: number;
+}) {
+  const pct = Math.max(0, Math.min(100, value || 0));
+  return (
+    <View
+      style={{
+        height,
+        borderRadius: radius.pill,
+        backgroundColor: track,
+        overflow: "hidden",
+      }}
+    >
+      <View
+        style={{
+          width: `${pct}%`,
+          height: "100%",
+          borderRadius: radius.pill,
+          backgroundColor: tone,
+        }}
+      />
+    </View>
+  );
+}
