@@ -58,3 +58,77 @@ export const activatePlan = async (plan_id: number) => {
   return response.data;
 };
 
+export const getMyHarvestingRecords = async () => {
+  const response = await apiClient.get("/api/harvesting/my");
+  return response.data;
+};
+
+export const saveHarvestingRecord = async (data: any) => {
+  const response = await apiClient.post("/api/harvesting/", data);
+  return response.data;
+};
+
+export const updateHarvestingRecord = async (id: number, data: any) => {
+  const response = await apiClient.put(`/api/harvesting/${id}`, data);
+  return response.data;
+};
+
+export const deleteHarvestingRecord = async (id: number) => {
+  const response = await apiClient.delete(`/api/harvesting/${id}`);
+  return response.data;
+};
+
+// AI APIs
+export const predictPodDisease = async (uri: string) => {
+  const formData = new FormData();
+  // @ts-ignore
+  formData.append("file", {
+    uri,
+    name: "photo.jpg",
+    type: "image/jpeg",
+  });
+  const response = await apiClient.post("/api/pod-disease/predict", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const predictLeafDisease = async (uri: string) => {
+  const formData = new FormData();
+  // @ts-ignore
+  formData.append("file", {
+    uri,
+    name: "photo.jpg",
+    type: "image/jpeg",
+  });
+  const response = await apiClient.post("/api/leaf-disease/predict", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const predictGrading = async (uri: string) => {
+  const formData = new FormData();
+  // @ts-ignore
+  formData.append("file", {
+    uri,
+    name: "photo.jpg",
+    type: "image/jpeg",
+  });
+  const response = await apiClient.post("/api/grading/predict", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const predictMarketPrice = async (data: any) => {
+  const response = await apiClient.post("/api/market/predict-price", data);
+  return response.data;
+};
+
+export const getMarketRecommendation = async (data: any) => {
+  const response = await apiClient.post("/api/market/recommend", data);
+  return response.data;
+};
+
+export default apiClient;
