@@ -137,3 +137,175 @@ export default function LoginScreen() {
                 <ActivityIndicator color={colors.white} />
               ) : (
                 <>
+                  <Text style={styles.primaryBtnText}>Sign In</Text>
+                  <LogIn size={18} color={colors.white} />
+                </>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.row}>
+              <TouchableOpacity>
+                <Text style={styles.linkText}>Forgot password?</Text>
+              </TouchableOpacity>
+              <Link href="/register" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.mutedText}>
+                    New here? <Text style={styles.linkText}>Register</Text>
+                  </Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
+
+          <View style={styles.dividerSection}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Corporate Access</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity style={styles.outlineBtn} activeOpacity={0.8}>
+            <Text style={styles.outlineBtnText}>Continue with SpiceID</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.legal}>
+          Protected by industry-standard encryption
+        </Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  scroll: { flexGrow: 1, paddingBottom: 40 },
+
+  header: {
+    paddingTop: 72,
+    paddingBottom: 46,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    overflow: "hidden",
+  },
+  headerInner: { alignItems: "center", paddingHorizontal: 24 },
+  logoTile: {
+    width: 78,
+    height: 78,
+    borderRadius: radius.xl,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  logo: { width: 50, height: 50 },
+  title: { fontSize: 27, fontWeight: "800", color: colors.white, letterSpacing: 1 },
+  subtitle: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: colors.brand300,
+    letterSpacing: 2.4,
+    textTransform: "uppercase",
+    marginTop: 5,
+  },
+  perkRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 14,
+    marginTop: 20,
+  },
+  perk: { flexDirection: "row", alignItems: "center", gap: 5 },
+  perkText: { color: colors.brand200, fontSize: 11.5, fontWeight: "600" },
+
+  formCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 20,
+    marginTop: -26,
+    borderRadius: radius.xxl,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 22,
+    ...shadow.card,
+  },
+  formTitle: { fontSize: 21, fontWeight: "800", color: colors.ink, letterSpacing: -0.5 },
+  formBlurb: { fontSize: 13, color: colors.muted, marginTop: 4, marginBottom: 22 },
+
+  form: { gap: 18 },
+  fieldGroup: { gap: 8 },
+  label: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: colors.muted,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    backgroundColor: colors.white,
+  },
+  input: { flex: 1, color: colors.ink, fontWeight: "600", fontSize: 14.5 },
+
+  primaryBtn: {
+    backgroundColor: colors.brand900,
+    borderRadius: radius.lg,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 4,
+    ...shadow.soft,
+  },
+  btnDisabled: { opacity: 0.6 },
+  primaryBtnText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 13.5,
+    letterSpacing: 0.9,
+    textTransform: "uppercase",
+  },
+
+  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  linkText: { color: colors.brand700, fontWeight: "700", fontSize: 13 },
+  mutedText: { color: colors.muted, fontSize: 13 },
+
+  dividerSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 24,
+    gap: 12,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: {
+    color: colors.mutedSoft,
+    fontSize: 9.5,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  outlineBtn: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    paddingVertical: 15,
+    alignItems: "center",
+  },
+  outlineBtnText: { color: colors.inkSoft, fontWeight: "700", fontSize: 13 },
+
+  legal: {
+    textAlign: "center",
+    color: colors.mutedSoft,
+    fontSize: 11,
+    marginTop: 22,
+    paddingHorizontal: 24,
+  },
+});
