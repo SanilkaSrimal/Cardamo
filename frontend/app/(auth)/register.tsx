@@ -135,3 +135,172 @@ export default function RegisterScreen() {
                   secureTextEntry={!showPassword}
                 />
                 <TouchableOpacity
+                  onPress={() => setShowPassword((s) => !s)}
+                  hitSlop={10}
+                  accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} color={colors.muted} />
+                  ) : (
+                    <Eye size={18} color={colors.muted} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={handleRegister}
+              style={[styles.primaryBtn, isLoading && styles.btnDisabled]}
+              disabled={isLoading}
+              activeOpacity={0.88}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <>
+                  <Text style={styles.primaryBtnText}>Create Account</Text>
+                  <UserPlus size={18} color={colors.white} />
+                </>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.center}>
+              <Link href="/login" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.mutedText}>
+                    Already have an account? <Text style={styles.linkText}>Sign In</Text>
+                  </Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.notice}>
+          <IconTile size={38} tone="brand">
+            <ShieldCheck size={17} color={colors.brand700} />
+          </IconTile>
+          <Text style={styles.noticeText}>
+            By creating an account you agree to our Terms of Service and Privacy Policy
+            regarding agricultural data usage.
+          </Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  scroll: { flexGrow: 1, paddingBottom: 40 },
+
+  header: {
+    paddingTop: 68,
+    paddingBottom: 46,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    overflow: "hidden",
+  },
+  headerInner: { alignItems: "center", paddingHorizontal: 24 },
+  logoTile: {
+    width: 66,
+    height: 66,
+    borderRadius: radius.lg,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  logo: { width: 42, height: 42 },
+  title: { fontSize: 24, fontWeight: "800", color: colors.white, letterSpacing: -0.5 },
+  subtitle: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: colors.brand300,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    marginTop: 5,
+  },
+  perkRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 14,
+    marginTop: 20,
+  },
+  perk: { flexDirection: "row", alignItems: "center", gap: 5 },
+  perkText: { color: colors.brand200, fontSize: 11.5, fontWeight: "600" },
+
+  formCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 20,
+    marginTop: -26,
+    borderRadius: radius.xxl,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 22,
+    ...shadow.card,
+  },
+
+  form: { gap: 18 },
+  fieldGroup: { gap: 8 },
+  label: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: colors.muted,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    backgroundColor: colors.white,
+  },
+  input: { flex: 1, color: colors.ink, fontWeight: "600", fontSize: 14.5 },
+
+  primaryBtn: {
+    backgroundColor: colors.brand900,
+    borderRadius: radius.lg,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 4,
+    ...shadow.soft,
+  },
+  btnDisabled: { opacity: 0.6 },
+  primaryBtnText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 13.5,
+    letterSpacing: 0.9,
+    textTransform: "uppercase",
+  },
+
+  center: { alignItems: "center" },
+  linkText: { color: colors.brand700, fontWeight: "700", fontSize: 13 },
+  mutedText: { color: colors.muted, fontSize: 13 },
+
+  notice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 20,
+    marginTop: 18,
+    padding: 14,
+    borderRadius: radius.lg,
+    backgroundColor: colors.brand50,
+    borderWidth: 1,
+    borderColor: colors.brand100,
+  },
+  noticeText: { flex: 1, fontSize: 12, color: colors.brand900, lineHeight: 18 },
+});
