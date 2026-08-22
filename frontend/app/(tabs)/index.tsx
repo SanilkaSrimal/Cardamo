@@ -152,3 +152,193 @@ export default function DashboardScreen() {
               <Text style={styles.serviceBlurb}>{service.blurb}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+      </View>
+
+      {/* ── Harvest shortcut ───────────────────────────────────── */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          onPress={() => router.push("/harvesting")}
+          activeOpacity={0.85}
+        >
+          <Card style={styles.shortcut}>
+            <IconTile size={46} tone="brand">
+              <Sprout size={22} color={colors.brand700} />
+            </IconTile>
+            <View style={styles.shortcutText}>
+              <Text style={styles.shortcutTitle}>Harvest Records</Text>
+              <Text style={styles.shortcutBlurb}>
+                Log yields, grades, and prices per batch
+              </Text>
+            </View>
+            <ChevronRight size={18} color={colors.mutedSoft} />
+          </Card>
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Recent activity ────────────────────────────────────── */}
+      <View style={[styles.section, { paddingBottom: 44 }]}>
+        <SectionTitle title="Recent Activity" />
+
+        {activities.length > 0 ? (
+          activities.map((activity) => (
+            <Card key={activity.id} style={styles.activityItem} padded={false}>
+              <IconTile size={40} tone="neutral">
+                {activityIconFor(activity.type)}
+              </IconTile>
+              <View style={styles.activityInfo}>
+                <Text style={styles.activityTitle}>{activity.type}</Text>
+                <Text style={styles.activityMeta} numberOfLines={1}>
+                  {new Date(activity.date).toLocaleString([], {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
+                  {"  ·  "}
+                  {activity.resultTitle}
+                </Text>
+              </View>
+              <ArrowRight size={15} color={colors.mutedSoft} />
+            </Card>
+          ))
+        ) : (
+          <EmptyState
+            icon={<Sparkles size={24} color={colors.brand500} />}
+            title="No scans yet"
+            message="Run your first analysis from the services above and it will show up here."
+          />
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+
+  header: {
+    paddingTop: 58,
+    paddingBottom: 44,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    overflow: "hidden",
+  },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  logoTile: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logo: { width: 28, height: 28 },
+  welcomeLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  welcomeName: {
+    color: colors.white,
+    fontSize: 21,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+    marginTop: 2,
+  },
+  creditsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
+  },
+  creditsValue: { color: colors.white, fontSize: 15, fontWeight: "800" },
+
+  insightCard: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
+    borderRadius: radius.lg,
+    padding: 16,
+  },
+  insightHead: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
+  insightLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  insightText: { color: colors.white, fontSize: 13.5, fontWeight: "500", lineHeight: 20 },
+  insightLink: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 12 },
+  insightLinkText: {
+    color: colors.brand300,
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.3,
+  },
+
+  statsBar: {
+    backgroundColor: colors.white,
+    marginHorizontal: 20,
+    marginTop: -24,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 18,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    ...shadow.card,
+  },
+  statCell: { flex: 1, flexDirection: "row", alignItems: "center" },
+  statItem: { flex: 1, alignItems: "center" },
+  statValue: { ...t.metric, fontSize: 21 },
+  statLabel: { ...t.eyebrow, fontSize: 9, marginTop: 3 },
+  statDivider: { width: 1, height: 30, backgroundColor: colors.borderSoft },
+
+  section: { paddingHorizontal: 20, paddingTop: 28 },
+
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  serviceCard: {
+    width: "48%",
+    backgroundColor: colors.white,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 18,
+    gap: 4,
+    ...shadow.soft,
+  },
+  serviceLabel: { ...t.subtitle, fontSize: 14.5, marginTop: 12 },
+  serviceBlurb: { ...t.small, fontSize: 11.5 },
+
+  shortcut: { flexDirection: "row", alignItems: "center", gap: 14 },
+  shortcutText: { flex: 1 },
+  shortcutTitle: { ...t.subtitle, fontSize: 14.5 },
+  shortcutBlurb: { ...t.small, fontSize: 11.5, marginTop: 2 },
+
+  activityItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    padding: 14,
+    marginBottom: 10,
+  },
+  activityInfo: { flex: 1 },
+  activityTitle: { ...t.subtitle, fontSize: 14 },
+  activityMeta: { ...t.small, fontSize: 11.5, marginTop: 2 },
+});
