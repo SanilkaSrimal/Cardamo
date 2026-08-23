@@ -316,3 +316,393 @@ export default function MarketScreen() {
                   >
                     {priceDelta.up ? (
                       <ArrowUpRight color={colors.brand950} size={14} />
+                    ) : (
+                      <ArrowDownRight color="#450a0a" size={14} />
+                    )}
+                    <Text
+                      style={[
+                        styles.deltaText,
+                        { color: priceDelta.up ? colors.brand950 : "#450a0a" },
+                      ]}
+                    >
+                      {priceDelta.up ? "+" : "-"}Rs. {formatMoney(priceDelta.amount)} (
+                      {priceDelta.pct.toFixed(2)}%)
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.currentRow}>
+                <Text style={styles.currentLabel}>Current Market Price</Text>
+                <Text style={styles.currentValue}>
+                  Rs. {formatMoney(result.current_dried_price_lkr_per_kg)}
+                  <Text style={styles.currentUnit}> per kg</Text>
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* ── Profit result ────────────────────────────────────── */}
+        {result?.type === "profit" && (
+          <View style={styles.profitCards}>
+            <Card style={styles.profitMainCard}>
+              <View style={styles.recBadge}>
+                <Text style={styles.recBadgeText}>Recommendation</Text>
+              </View>
+
+              <Text style={styles.profitStrategyTitle}>
+                {result.recommendation.label.replace(/_/g, " ").toLowerCase()}
+              </Text>
+              <Text style={styles.profitMessage}>
+                {result.recommendation.message}
+              </Text>
+
+              {/* The predicted dried price driving this call */}
+              <View style={styles.miniForecast}>
+                <MeshBackdrop />
+                <View style={styles.miniForecastInner}>
+                  <Text style={styles.headlineLabel}>
+                    Predicted Dried Price (
+                    {result.market_prediction?.horizon_weeks ?? 4}W)
+                  </Text>
+                  <View style={styles.headlineRow}>
+                    <Text style={[styles.headlineValue, { fontSize: 27 }]}>
+                      Rs.{" "}
+                      {formatMoney(
+                        result.market_prediction?.predicted_dried_price_next_4w_lkr_per_kg
+                      )}
+                    </Text>
+                    <Text style={styles.headlineUnit}>per kg</Text>
+                  </View>
+                  <Text style={styles.miniMeta}>
+                    Current Rs.{" "}
+                    {formatMoney(result.market_prediction?.current_dried_price_lkr_per_kg)}
+                    {"  ·  "}
+                    {result.market_prediction?.grade} — {result.market_prediction?.region}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.profitSplit}>
+                <View style={styles.profitCell}>
+                  <Text style={styles.profitCellLabel}>Fresh Revenue</Text>
+                  <Text style={styles.profitCellValue}>
+                    Rs. {formatMoney(result.profit_calculation.fresh_revenue_lkr)}
+                  </Text>
+                </View>
+                <View style={[styles.profitCell, styles.profitCellAccent]}>
+                  <Text style={[styles.profitCellLabel, { color: colors.brand600 }]}>
+                    Dried Profit
+                  </Text>
+                  <Text style={[styles.profitCellValue, { color: colors.brand800 }]}>
+                    Rs.{" "}
+                    {formatMoney(
+                      result.profit_calculation.predicted_dried_net_profit_lkr
+                    )}
+                  </Text>
+                </View>
+              </View>
+            </Card>
+
+            <View style={styles.profitInfoBox}>
+              <IconTile size={38} tone="brand">
+                <Info size={17} color={colors.brand700} />
+              </IconTile>
+              <Text style={styles.profitInfoText}>
+                At a {profitForm.conversion_ratio}:1 conversion ratio, drying is predicted to
+                yield a profit difference of{" "}
+                <Text style={styles.profitHighlight}>
+                  Rs.{" "}
+                  {formatMoney(
+                    result.profit_calculation.predicted_profit_difference_lkr
+                  )}
+                </Text>
+                .
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* ── Empty state ──────────────────────────────────────── */}
+        {!result && !loading && (
+          <EmptyState
+            style={styles.emptyState}
+            icon={
+              activeTab === "price" ? (
+                <CalendarRange size={24} color={colors.brand500} />
+              ) : (
+                <Warehouse size={24} color={colors.brand500} />
+              )
+            }
+            title={activeTab === "price" ? "No forecast yet" : "No optimization yet"}
+            message={
+              activeTab === "price"
+                ? "Pick a date, region, and grade to see the projected dried price."
+                : "Enter your harvest and cost figures to compare selling fresh against drying."
+            }
+          />
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+
+  header: {
+    paddingTop: 56,
+    paddingBottom: 0,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    overflow: "hidden",
+  },
+  headerInner: { paddingHorizontal: 20 },
+  headerEyebrow: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  headerTitle: {
+    color: colors.white,
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    marginTop: 3,
+  },
+  tabs: {
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: radius.pill,
+    padding: 4,
+    marginTop: 18,
+    marginBottom: 18,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: radius.pill,
+  },
+  activeTab: { backgroundColor: colors.white },
+  tabText: { color: colors.brand200, fontWeight: "700", fontSize: 12 },
+  activeTabText: { color: colors.brand900, fontWeight: "800" },
+
+  body: { flex: 1 },
+  bodyContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+
+  formCard: { padding: 18 },
+  formHead: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20 },
+  formTitle: { ...t.title, fontSize: 17 },
+  formBlurb: { ...t.small, fontSize: 12, marginTop: 2 },
+
+  formLabel: { ...t.eyebrow, marginBottom: 7 },
+  spacedLabel: { marginTop: 18 },
+
+  dateField: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dateText: { color: colors.ink, fontWeight: "700", fontSize: 14 },
+
+  selectorRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
+  chipActive: { backgroundColor: colors.brand900, borderColor: colors.brand900 },
+  chipText: { fontSize: 12.5, fontWeight: "700", color: colors.inkSoft },
+  chipTextActive: { color: colors.white },
+
+  fieldGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 20 },
+  fieldItem: { width: "47%" },
+  textInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
+    color: colors.ink,
+    fontWeight: "700",
+    fontSize: 14,
+    backgroundColor: colors.white,
+  },
+
+  primaryBtn: {
+    backgroundColor: colors.brand900,
+    borderRadius: radius.lg,
+    paddingVertical: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 22,
+    ...shadow.soft,
+  },
+  primaryBtnText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 13,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+
+  /* Price result */
+  resultCard: {
+    marginTop: 18,
+    borderRadius: radius.xxl,
+    overflow: "hidden",
+    ...shadow.card,
+  },
+  resultInner: { padding: 20 },
+  resultHead: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 18 },
+  resultLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+  },
+  resultTitle: {
+    color: colors.white,
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+    marginTop: 4,
+  },
+  resultMeta: { color: colors.brand200, fontSize: 11, marginTop: 5, opacity: 0.8 },
+
+  headlineBox: {
+    backgroundColor: "rgba(16,185,129,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(52,211,153,0.4)",
+    borderRadius: radius.lg,
+    padding: 16,
+  },
+  headlineLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.3,
+    textTransform: "uppercase",
+    marginBottom: 9,
+  },
+  headlineRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, flexWrap: "wrap" },
+  headlineValue: {
+    color: colors.brand300,
+    fontSize: 30,
+    fontWeight: "800",
+    letterSpacing: -1,
+  },
+  headlineUnit: { color: colors.brand200, fontSize: 12, fontWeight: "600", paddingBottom: 3 },
+  deltaPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    alignSelf: "flex-start",
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    marginTop: 14,
+  },
+  deltaText: { fontSize: 12, fontWeight: "800" },
+
+  currentRow: {
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.12)",
+  },
+  currentLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.3,
+    textTransform: "uppercase",
+    opacity: 0.8,
+    marginBottom: 6,
+  },
+  currentValue: { color: colors.white, fontSize: 19, fontWeight: "800" },
+  currentUnit: { color: colors.brand200, fontSize: 12, fontWeight: "500" },
+
+  /* Profit result */
+  profitCards: { marginTop: 18, gap: 12 },
+  profitMainCard: { borderWidth: 2, borderColor: colors.brand600, paddingTop: 22 },
+  recBadge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    backgroundColor: colors.brand600,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderBottomLeftRadius: radius.md,
+    borderTopRightRadius: radius.xl - 2,
+  },
+  recBadgeText: {
+    color: colors.white,
+    fontSize: 9.5,
+    fontWeight: "800",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  profitStrategyTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: colors.ink,
+    letterSpacing: -0.6,
+    textTransform: "capitalize",
+    marginBottom: 8,
+  },
+  profitMessage: { color: colors.inkSoft, fontStyle: "italic", fontSize: 13, lineHeight: 20 },
+
+  miniForecast: {
+    marginTop: 18,
+    borderRadius: radius.lg,
+    overflow: "hidden",
+  },
+  miniForecastInner: { padding: 16 },
+  miniMeta: { color: colors.brand200, fontSize: 11, marginTop: 10, opacity: 0.85 },
+
+  profitSplit: { flexDirection: "row", gap: 10, marginTop: 16 },
+  profitCell: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 14,
+  },
+  profitCellAccent: { backgroundColor: colors.brand50, borderColor: colors.brand100 },
+  profitCellLabel: { ...t.eyebrow, fontSize: 9, marginBottom: 5 },
+  profitCellValue: { fontSize: 15, fontWeight: "800", color: colors.ink },
+
+  profitInfoBox: {
+    flexDirection: "row",
+    gap: 12,
+    backgroundColor: colors.brand50,
+    borderRadius: radius.lg,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.brand100,
+    alignItems: "center",
+  },
+  profitInfoText: { flex: 1, fontSize: 12.5, color: colors.brand900, lineHeight: 19 },
+  profitHighlight: { fontWeight: "800" },
+
+  emptyState: { marginTop: 18 },
+});
