@@ -209,3 +209,262 @@ export default function GradingScreen() {
                     <View style={styles.gradeHead}>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.cardSubLabel}>Standard Grade</Text>
+                        <Text style={styles.standardName}>
+                          {result.standard_grade.standard_name}
+                        </Text>
+                      </View>
+                      {result.standard_grade.quality_rank != null && (
+                        <Badge
+                          tone="spice"
+                          label={`Tier ${result.standard_grade.quality_rank}`}
+                        />
+                      )}
+                    </View>
+
+                    {result.standard_grade.market_tier && (
+                      <View style={styles.marketTierRow}>
+                        <Star size={13} color={colors.spice500} />
+                        <Text style={styles.marketTier}>
+                          {result.standard_grade.market_tier}
+                        </Text>
+                      </View>
+                    )}
+
+                    <Text style={styles.descriptionText}>
+                      {result.standard_grade.description}
+                    </Text>
+
+                    {result.standard_grade.typical_traits?.length > 0 && (
+                      <>
+                        <Text style={[styles.cardSubLabel, styles.traitsLabel]}>
+                          Typical Traits
+                        </Text>
+                        {result.standard_grade.typical_traits.map(
+                          (trait: string, idx: number) => (
+                            <View key={idx} style={styles.bulletRow}>
+                              <View style={styles.bulletPoint} />
+                              <Text style={styles.traitText}>{trait}</Text>
+                            </View>
+                          )
+                        )}
+                      </>
+                    )}
+                  </Card>
+                )}
+
+                {result.estimated_size && (
+                  <Card style={styles.sizeCard}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.cardSubLabel}>Estimated Size</Text>
+                      <Text style={styles.sizeValue}>{result.estimated_size}</Text>
+                    </View>
+                    <IconTile size={46} tone="brand">
+                      <Ruler size={21} color={colors.brand700} />
+                    </IconTile>
+                  </Card>
+                )}
+
+                {result.xai?.summary && (
+                  <View style={styles.darkCard}>
+                    <View style={styles.darkHead}>
+                      <Sparkles size={13} color={colors.brand300} />
+                      <Text style={styles.darkCardLabel}>AI Explanation</Text>
+                    </View>
+                    <Text style={styles.darkCardText}>{result.xai.summary}</Text>
+                  </View>
+                )}
+
+                <View style={styles.disclaimer}>
+                  <Info size={14} color={colors.muted} />
+                  <Text style={styles.disclaimerText}>
+                    Visual grading only. Final value still depends on moisture content and
+                    aroma profile.
+                  </Text>
+                </View>
+
+                {user && (
+                  <PrimaryButton
+                    label="Save to Profile"
+                    tone="dark"
+                    loading={isSaving}
+                    onPress={handleSave}
+                    icon={<Save size={17} color={colors.white} />}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  body: { flex: 1 },
+  bodyContent: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+
+  pickSection: { gap: 14 },
+  infoBox: { flexDirection: "row", alignItems: "center", gap: 14 },
+  infoText: { flex: 1, ...t.body, fontSize: 13 },
+  primaryPickBtn: {
+    backgroundColor: colors.brand900,
+    borderRadius: radius.xxl,
+    paddingVertical: 36,
+    alignItems: "center",
+    gap: 6,
+    ...shadow.card,
+  },
+  pickIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,255,255,0.13)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  primaryPickLabel: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 15,
+    letterSpacing: 0.4,
+  },
+  primaryPickHint: { color: colors.brand300, fontSize: 12, fontWeight: "500" },
+  secondaryPickBtn: {
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    borderRadius: radius.xl,
+    backgroundColor: colors.white,
+    paddingVertical: 22,
+    alignItems: "center",
+    gap: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  secondaryPickLabel: { color: colors.inkSoft, fontWeight: "700", fontSize: 13.5 },
+
+  tipRow: { flexDirection: "row", gap: 10, marginTop: 4 },
+  tipCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 12,
+    gap: 4,
+  },
+  tipTitle: { fontSize: 12, fontWeight: "800", color: colors.ink, marginTop: 4 },
+  tipDesc: { fontSize: 10.5, color: colors.muted, lineHeight: 14 },
+
+  resultSection: { gap: 16 },
+  imageFrame: {
+    borderRadius: radius.xxl,
+    overflow: "hidden",
+    backgroundColor: colors.white,
+    ...shadow.card,
+  },
+  previewImage: { width: "100%", height: 300 },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(2,44,34,0.72)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  overlayText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 12,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+  },
+  retakeBtn: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+  },
+  retakeBtnText: { color: colors.ink, fontWeight: "800", fontSize: 11.5 },
+
+  cards: { gap: 14 },
+
+  gradeCard: {
+    borderRadius: radius.xxl,
+    overflow: "hidden",
+    ...shadow.card,
+  },
+  gradeInner: { alignItems: "center", paddingVertical: 30, paddingHorizontal: 20 },
+  gradeLabel: {
+    color: colors.spice300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.8,
+    textTransform: "uppercase",
+    marginTop: 14,
+  },
+  gradeValue: {
+    color: colors.white,
+    fontSize: 44,
+    fontWeight: "800",
+    letterSpacing: -1.5,
+    marginTop: 6,
+  },
+  gradeConf: { color: colors.brand200, fontSize: 12.5, fontWeight: "600", marginTop: 6 },
+  gradeBar: { width: 150, marginTop: 12 },
+
+  cardSubLabel: { ...t.eyebrow, marginBottom: 6 },
+  gradeHead: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  standardName: { fontSize: 17, fontWeight: "800", color: colors.ink, letterSpacing: -0.3 },
+  marketTierRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 },
+  marketTier: { fontSize: 13, fontWeight: "700", color: colors.spice600 },
+  descriptionText: { ...t.body, marginTop: 10 },
+  traitsLabel: { marginTop: 18, marginBottom: 10 },
+  bulletRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 8 },
+  bulletPoint: {
+    width: 6,
+    height: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.brand500,
+    marginTop: 7,
+  },
+  traitText: { flex: 1, fontSize: 13, color: colors.inkSoft, lineHeight: 19 },
+
+  sizeCard: { flexDirection: "row", alignItems: "center", gap: 14 },
+  sizeValue: { fontSize: 20, fontWeight: "800", color: colors.brand800, letterSpacing: -0.4 },
+
+  darkCard: {
+    backgroundColor: colors.brand950,
+    borderRadius: radius.xl,
+    padding: 20,
+    ...shadow.card,
+  },
+  darkHead: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 },
+  darkCardLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  darkCardText: { color: colors.white, fontWeight: "500", lineHeight: 21, fontSize: 13.5 },
+
+  disclaimer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 14,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: colors.border,
+  },
+  disclaimerText: { flex: 1, fontSize: 11.5, color: colors.muted, lineHeight: 17 },
+});
