@@ -215,3 +215,269 @@ export default function HarvestingScreen() {
               </View>
               
               {r.notes && (
+                <Text style={styles.notesText}>Notes: {r.notes}</Text>
+              )}
+            </View>
+          ))
+        )}
+      </ScrollView>
+
+      {/* Form Modal */}
+      <Modal visible={modalOpen} animationType="slide" presentationStyle="pageSheet">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{editRecord ? "Edit Record" : "Add Harvesting Record"}</Text>
+            <TouchableOpacity onPress={() => setModalOpen(false)}>
+              <X size={24} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalContent}>
+            <Text style={styles.inputLabel}>Fresh Price (LKR/kg) *</Text>
+            <TextInput style={styles.input} value={form.current_fresh_price_lkr_per_kg} onChangeText={(t) => setForm({...form, current_fresh_price_lkr_per_kg: t})} keyboardType="numeric" placeholder="e.g. 2500" />
+            
+            <Text style={styles.inputLabel}>Harvest (kg)</Text>
+            <TextInput style={styles.input} value={form.harvest_fresh_kg} onChangeText={(t) => setForm({...form, harvest_fresh_kg: t})} keyboardType="numeric" placeholder="e.g. 100" />
+            
+            <Text style={styles.inputLabel}>Drying Cost (LKR) *</Text>
+            <TextInput style={styles.input} value={form.drying_cost_total_lkr} onChangeText={(t) => setForm({...form, drying_cost_total_lkr: t})} keyboardType="numeric" placeholder="e.g. 15000" />
+            
+            <Text style={styles.inputLabel}>Storage Cost (LKR) *</Text>
+            <TextInput style={styles.input} value={form.storage_cost_total_lkr} onChangeText={(t) => setForm({...form, storage_cost_total_lkr: t})} keyboardType="numeric" placeholder="e.g. 5000" />
+            
+            <Text style={styles.inputLabel}>Quality Loss (%)</Text>
+            <TextInput style={styles.input} value={form.quality_loss_pct_est} onChangeText={(t) => setForm({...form, quality_loss_pct_est: t})} keyboardType="numeric" />
+            
+            {/* Conversion ratio hidden – uses default value of 4.0 */}
+            
+            <Text style={styles.inputLabel}>Notes</Text>
+            <TextInput style={[styles.input, { height: 80, textAlignVertical: "top" }]} value={form.notes} onChangeText={(t) => setForm({...form, notes: t})} multiline />
+            
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
+              {saving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveBtnText}>SAVE RECORD</Text>}
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Predict Modal */}
+      <Modal visible={predictRecord !== null} animationType="slide" presentationStyle="pageSheet">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Profit Optimizer</Text>
+            <TouchableOpacity onPress={() => setPredictRecord(null)}>
+              <X size={24} color="#6b7280" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalContent}>
+            <Text style={styles.inputLabel}>Date (YYYY-MM-DD)</Text>
+            <TextInput style={styles.input} value={predictForm.date} onChangeText={(t) => setPredictForm({...predictForm, date: t})} placeholder="YYYY-MM-DD" />
+            
+            <Text style={styles.inputLabel}>Region</Text>
+            <View style={styles.chipsContainer}>
+              {REGIONS.map(r => (
+                <TouchableOpacity key={r} style={[styles.chip, predictForm.region === r && styles.chipActive]} onPress={() => setPredictForm({...predictForm, region: r})}>
+                  <Text style={[styles.chipText, predictForm.region === r && styles.chipTextActive]}>{r}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>Grade</Text>
+            <View style={styles.chipsContainer}>
+              {GRADES.map(g => (
+                <TouchableOpacity key={g} style={[styles.chip, predictForm.grade === g && styles.chipActive]} onPress={() => setPredictForm({...predictForm, grade: g})}>
+                  <Text style={[styles.chipText, predictForm.grade === g && styles.chipTextActive]}>{g}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity style={[styles.saveBtn, { marginTop: 20 }]} onPress={handlePredictSubmit} disabled={predictLoading}>
+              {predictLoading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveBtnText}>GET PREDICTION</Text>}
+            </TouchableOpacity>
+
+            {recommendData && (
+              <View style={styles.recommendationCard}>
+                <Text style={styles.recBadge}>RECOMMENDATION</Text>
+                <Text style={styles.recTitle}>{recommendData.recommendation.label.replace(/_/g, " ")}</Text>
+                <Text style={styles.recMessage}>"{recommendData.recommendation.message}"</Text>
+                <View style={styles.recGrid}>
+                  <View style={styles.recItem}>
+                    <Text style={styles.recLabel}>Fresh Revenue</Text>
+                    <Text style={styles.recVal}>Rs. {recommendData.profit_calculation.fresh_revenue_lkr?.toLocaleString()}</Text>
+                  </View>
+                  <View style={styles.recItem}>
+                    <Text style={styles.recLabelAccent}>Predicted Profit</Text>
+                    <Text style={styles.recValAccent}>Rs. {recommendData.profit_calculation.predicted_dried_net_profit_lkr?.toLocaleString()}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  addBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: { padding: 20, paddingBottom: 40 },
+
+  recordCard: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: radius.xl,
+    padding: 18,
+    marginBottom: 14,
+    ...shadow.soft,
+  },
+  recordHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
+  },
+  recordDate: { fontSize: 14.5, fontWeight: "800", color: colors.ink },
+  actionBtns: { flexDirection: "row", gap: 8 },
+  actionBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  grid: { flexDirection: "row", flexWrap: "wrap" },
+  gridItem: { width: "50%", marginBottom: 14 },
+  gridLabel: { ...t.eyebrow, fontSize: 9, marginBottom: 3 },
+  gridValue: { fontSize: 15, fontWeight: "800", color: colors.ink },
+  notesText: {
+    fontSize: 12.5,
+    color: colors.muted,
+    fontStyle: "italic",
+    marginTop: 6,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+    lineHeight: 18,
+  },
+
+  modalContainer: { flex: 1, backgroundColor: colors.surface },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
+  },
+  modalTitle: { fontSize: 18, fontWeight: "800", color: colors.ink, letterSpacing: -0.4 },
+  modalContent: { padding: 20, paddingBottom: 60 },
+  inputLabel: { ...t.eyebrow, marginBottom: 8, marginTop: 18 },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14.5,
+    fontWeight: "600",
+    color: colors.ink,
+    backgroundColor: colors.white,
+  },
+  saveBtn: {
+    backgroundColor: colors.brand900,
+    paddingVertical: 16,
+    borderRadius: radius.lg,
+    alignItems: "center",
+    marginTop: 30,
+    ...shadow.soft,
+  },
+  saveBtnText: {
+    color: colors.white,
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+
+  chipsContainer: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
+    backgroundColor: colors.white,
+  },
+  chipActive: { backgroundColor: colors.brand900, borderColor: colors.brand900 },
+  chipText: { fontSize: 12.5, fontWeight: "700", color: colors.inkSoft },
+  chipTextActive: { color: colors.white, fontWeight: "700" },
+
+  recommendationCard: {
+    marginTop: 34,
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.brand600,
+    borderRadius: radius.xl,
+    padding: 20,
+    ...shadow.card,
+  },
+  recBadge: {
+    position: "absolute",
+    top: -13,
+    right: 16,
+    backgroundColor: colors.brand600,
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: "800",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    letterSpacing: 0.8,
+    overflow: "hidden",
+  },
+  recTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: colors.ink,
+    letterSpacing: -0.5,
+    textTransform: "capitalize",
+    marginBottom: 8,
+  },
+  recMessage: { fontSize: 13, color: colors.inkSoft, fontStyle: "italic", marginBottom: 18, lineHeight: 20 },
+  recGrid: {
+    flexDirection: "row",
+    gap: 10,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+  },
+  recItem: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 13,
+  },
+  recLabel: { ...t.eyebrow, fontSize: 9, marginBottom: 5 },
+  recVal: { fontSize: 15, fontWeight: "800", color: colors.ink },
+  recLabelAccent: { ...t.eyebrow, fontSize: 9, color: colors.brand600, marginBottom: 5 },
+  recValAccent: { fontSize: 15, fontWeight: "800", color: colors.brand800 },
+});
