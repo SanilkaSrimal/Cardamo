@@ -239,3 +239,299 @@ export default function LeafDiseaseScreen() {
                   </IconTile>
                 </Card>
 
+                {isInvalidLeaf && (result.message || result.recommendation?.farmer_action) && (
+                  <Card>
+                    <Text style={styles.cardSubLabel}>What happened</Text>
+                    <Text style={styles.bodyText}>
+                      {result.message || result.recommendation?.farmer_action}
+                    </Text>
+                  </Card>
+                )}
+
+                {/* Probability breakdown */}
+                {!isInvalidLeaf && (
+                  <Card>
+                    <Text style={[styles.cardSubLabel, { marginBottom: 14 }]}>
+                      Confidence Breakdown
+                    </Text>
+                    {Object.entries(result.probabilities || {}).map(
+                      ([name, prob]: [string, any]) => {
+                        const isTop = name === result.predicted_class;
+                        return (
+                          <View key={name} style={styles.probRow}>
+                            <View style={styles.probLabelRow}>
+                              <Text
+                                style={[styles.probName, isTop && styles.probNameActive]}
+                              >
+                                {name.replace(/_/g, " ")}
+                              </Text>
+                              <Text
+                                style={[styles.probValue, isTop && styles.probValueActive]}
+                              >
+                                {typeof prob === "number" ? prob.toFixed(1) : prob}%
+                              </Text>
+                            </View>
+                            <ProgressBar
+                              value={typeof prob === "number" ? prob : 0}
+                              tone={isTop ? colors.brand600 : colors.mutedSoft}
+                              height={6}
+                            />
+                          </View>
+                        );
+                      }
+                    )}
+                  </Card>
+                )}
+
+                {/* Recommendation */}
+                {result.recommendation && !isInvalidLeaf && (
+                  <View style={styles.darkCard}>
+                    <View style={styles.darkHead}>
+                      <Text style={styles.darkCardLabel}>Recommendation</Text>
+                      {result.recommendation.risk_level && (
+                        <View
+                          style={[
+                            styles.riskPill,
+                            { backgroundColor: riskTone(result.recommendation.risk_level) },
+                          ]}
+                        >
+                          <Text style={styles.riskPillText}>
+                            {result.recommendation.risk_level} risk
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <Text style={styles.darkCardText}>
+                      {result.recommendation.farmer_action}
+                    </Text>
+
+                    {result.recommendation.organic_solutions?.length > 0 && (
+                      <View style={styles.solutionsList}>
+                        <Text style={styles.solutionsLabel}>Organic Solutions</Text>
+                        {result.recommendation.organic_solutions.map(
+                          (solution: string, i: number) => (
+                            <View key={i} style={styles.solutionItem}>
+                              <View style={styles.solutionIndex}>
+                                <Text style={styles.solutionIndexText}>{i + 1}</Text>
+                              </View>
+                              <Text style={styles.solutionText}>{solution}</Text>
+                            </View>
+                          )
+                        )}
+                      </View>
+                    )}
+
+                    {result.recommendation.note && (
+                      <View style={styles.noteBox}>
+                        <Info size={14} color={colors.brand300} />
+                        <Text style={styles.noteText}>{result.recommendation.note}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {user && (
+                  <PrimaryButton
+                    label="Save to Profile"
+                    tone="dark"
+                    loading={isSaving}
+                    onPress={handleSave}
+                    icon={<Save size={17} color={colors.white} />}
+                  />
+                )}
+              </View>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  body: { flex: 1 },
+  bodyContent: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+
+  pickSection: { gap: 14 },
+  infoBox: { flexDirection: "row", alignItems: "center", gap: 14 },
+  infoText: { flex: 1, ...t.body, fontSize: 13 },
+  primaryPickBtn: {
+    backgroundColor: colors.brand900,
+    borderRadius: radius.xxl,
+    paddingVertical: 36,
+    alignItems: "center",
+    gap: 6,
+    ...shadow.card,
+  },
+  pickIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,255,255,0.13)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  primaryPickLabel: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 15,
+    letterSpacing: 0.4,
+  },
+  primaryPickHint: { color: colors.brand300, fontSize: 12, fontWeight: "500" },
+  secondaryPickBtn: {
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    borderRadius: radius.xl,
+    backgroundColor: colors.white,
+    paddingVertical: 22,
+    alignItems: "center",
+    gap: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  secondaryPickLabel: { color: colors.inkSoft, fontWeight: "700", fontSize: 13.5 },
+
+  tipRow: { flexDirection: "row", gap: 10, marginTop: 4 },
+  tipCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 12,
+    gap: 4,
+  },
+  tipTitle: { fontSize: 12, fontWeight: "800", color: colors.ink, marginTop: 4 },
+  tipDesc: { fontSize: 10.5, color: colors.muted, lineHeight: 14 },
+
+  resultSection: { gap: 16 },
+  imageFrame: {
+    borderRadius: radius.xxl,
+    overflow: "hidden",
+    backgroundColor: colors.white,
+    ...shadow.card,
+  },
+  previewImage: { width: "100%", height: 300 },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(2,44,34,0.72)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  overlayText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 12,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+  },
+  retakeBtn: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+  },
+  retakeBtnText: { color: colors.ink, fontWeight: "800", fontSize: 11.5 },
+
+  cards: { gap: 14 },
+  statusCard: { flexDirection: "row", alignItems: "center", gap: 14, borderWidth: 1.5 },
+  dangerCard: { backgroundColor: colors.danger50, borderColor: colors.danger200 },
+  successCard: { backgroundColor: colors.brand50, borderColor: colors.brand200 },
+  warnCard: { backgroundColor: colors.warn50, borderColor: colors.warn200 },
+  cardSubLabel: { ...t.eyebrow, marginBottom: 6 },
+  statusText: {
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+    textTransform: "capitalize",
+  },
+  bodyText: { ...t.body },
+
+  probRow: { marginBottom: 14 },
+  probLabelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  probName: {
+    fontSize: 12.5,
+    fontWeight: "600",
+    color: colors.muted,
+    textTransform: "capitalize",
+  },
+  probNameActive: { color: colors.ink, fontWeight: "800" },
+  probValue: { fontSize: 12.5, fontWeight: "700", color: colors.muted },
+  probValueActive: { color: colors.brand700, fontWeight: "800" },
+
+  darkCard: {
+    backgroundColor: colors.brand950,
+    borderRadius: radius.xl,
+    padding: 20,
+    ...shadow.card,
+  },
+  darkHead: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  darkCardLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  riskPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill },
+  riskPillText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  darkCardText: { color: colors.white, fontWeight: "500", lineHeight: 21, fontSize: 13.5 },
+
+  solutionsList: { marginTop: 18 },
+  solutionsLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginBottom: 10,
+  },
+  solutionItem: { flexDirection: "row", alignItems: "flex-start", marginBottom: 9, gap: 10 },
+  solutionIndex: {
+    width: 20,
+    height: 20,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(16,185,129,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  solutionIndexText: { color: colors.brand300, fontSize: 10, fontWeight: "800" },
+  solutionText: { color: "#d1d5db", fontSize: 12.5, lineHeight: 19, flex: 1 },
+
+  noteBox: {
+    flexDirection: "row",
+    gap: 9,
+    backgroundColor: "rgba(16,185,129,0.1)",
+    padding: 13,
+    borderRadius: radius.md,
+    marginTop: 16,
+    alignItems: "flex-start",
+  },
+  noteText: { color: colors.brand200, fontSize: 11.5, flex: 1, lineHeight: 17 },
+});
