@@ -102,3 +102,131 @@ export default function ActivatePackageScreen() {
                     <Text style={styles.planBlurb}>
                       {plan.total_credits.toLocaleString()} credits
                     </Text>
+                  </View>
+                </View>
+
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceSymbol}>Rs.</Text>
+                  <Text style={styles.priceAmount}>{plan.price.toLocaleString()}</Text>
+                </View>
+
+                <View style={styles.features}>
+                  {[
+                    `${plan.total_credits.toLocaleString()} credits total`,
+                    `Up to ${perAnalysis} AI analyses`,
+                    "Credits never expire",
+                  ].map((feature) => (
+                    <View key={feature} style={styles.featureRow}>
+                      <View style={styles.featureTick}>
+                        <Check size={11} color={colors.brand700} strokeWidth={3} />
+                      </View>
+                      <Text style={styles.featureText}>{feature}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  style={[
+                    styles.activateBtn,
+                    !isPopular && styles.activateBtnAlt,
+                    (isActivating || activatingId !== null) && styles.btnDisabled,
+                  ]}
+                  onPress={() => handleActivate(plan.id)}
+                  disabled={isActivating || activatingId !== null}
+                  activeOpacity={0.88}
+                >
+                  {isActivating ? (
+                    <ActivityIndicator size="small" color={colors.white} />
+                  ) : (
+                    <>
+                      <Zap size={17} color={colors.white} />
+                      <Text style={styles.activateText}>Activate Plan</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </Card>
+            );
+          })
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.surface },
+  content: { padding: 20, paddingTop: 24, paddingBottom: 40 },
+  subtitle: { ...t.body, textAlign: "center", marginBottom: 24, paddingHorizontal: 10 },
+
+  card: { padding: 20, marginBottom: 20, marginTop: 8 },
+  cardPopular: { borderColor: colors.brand600, borderWidth: 2, ...shadow.card },
+  popularBadge: {
+    position: "absolute",
+    top: -13,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: colors.brand600,
+    paddingHorizontal: 13,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+  },
+  popularText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+
+  cardHeader: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 18 },
+  planName: { fontSize: 18, fontWeight: "800", color: colors.ink, letterSpacing: -0.4 },
+  planBlurb: { fontSize: 12.5, color: colors.muted, marginTop: 2 },
+
+  priceRow: { flexDirection: "row", alignItems: "baseline", marginBottom: 20 },
+  priceSymbol: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.muted,
+    marginRight: 5,
+  },
+  priceAmount: {
+    fontSize: 38,
+    fontWeight: "800",
+    color: colors.ink,
+    letterSpacing: -1.4,
+  },
+
+  features: { marginBottom: 22, gap: 11 },
+  featureRow: { flexDirection: "row", alignItems: "center", gap: 11 },
+  featureTick: {
+    width: 20,
+    height: 20,
+    borderRadius: radius.pill,
+    backgroundColor: colors.brand50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  featureText: { fontSize: 14, color: colors.inkSoft, fontWeight: "500" },
+
+  activateBtn: {
+    backgroundColor: colors.brand900,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 15,
+    borderRadius: radius.lg,
+    ...shadow.soft,
+  },
+  activateBtnAlt: { backgroundColor: colors.ink },
+  btnDisabled: { opacity: 0.55 },
+  activateText: {
+    color: colors.white,
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+});
