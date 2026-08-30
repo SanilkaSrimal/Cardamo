@@ -13,12 +13,18 @@ export const unstable_settings = {
 
 SplashScreen.preventAutoHideAsync();
 
+import { AuthProvider } from '../lib/AuthContext';
+
 export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync();
   }, []);
 
-  return <RootLayoutNav />;
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
+  );
 }
 
 function RootLayoutNav() {

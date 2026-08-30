@@ -1,15 +1,85 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { predictPodDisease } from "../lib/api";
-import { Camera, ShieldAlert, CheckCircle2, ChevronLeft, Info, ImageIcon } from "lucide-react-native";
+import { predictPodDisease, saveHarvestingRecord } from "../lib/api";
+import {
+  Camera,
+  ShieldAlert,
+  CheckCircle2,
+  Info,
+  ImageIcon,
+  Save,
+  AlertTriangle,
+  Sun,
+  Focus,
+  Crop,
+} from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useAuth } from "../lib/AuthContext";
+import { saveScanActivity } from "../lib/history";
+import { colors, radius, shadow, type as t } from "../constants/theme";
+import {
+  ScreenHeader,
+  Card,
+  IconTile,
+  PrimaryButton,
+  ProgressBar,
+} from "../components/ui";
+
+const tips = [
+  { icon: Sun, title: "Even light", desc: "Shade or diffused daylight" },
+  { icon: Focus, title: "Sharp focus", desc: "Tap the pod to focus" },
+  { icon: Crop, title: "Fill frame", desc: "One pod, close up" },
+];
+
+const riskTone = (level?: string) => {
+  if (level === "High") return colors.danger;
+  if (level === "Medium") return colors.spice500;
+  if (level === "Low") return colors.brand500;
+  return colors.muted;
+};
 
 export default function PodDiseaseScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // The backend returns three outcomes, not two: the image gate can reject the
+  // upload before the disease model ever runs.
+  const isInvalidPod = result?.predicted_class === "not_a_cardamom_pod";
+  const hasDisease = !isInvalidPod && !!result?.disease_detected;
+
+  const handleSave = async () => {
+    if (!result) return;
+    setIsSaving(true);
+    try {
+      await saveHarvestingRecord({
+        crop_type: "Cardamom",
+        weight_kg: 0,
+        grade: "N/A",
+        price_per_kg: 0,
+        notes: `Pod Analysis: ${result.predicted_class || 'Healthy'}`
+      });
+      Alert.alert("Success", "Record saved to your profile.");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "Failed to save record.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const pickImage = async (useCamera: boolean) => {
     let res: ImagePicker.ImagePickerResult;
@@ -29,125 +99,432 @@ export default function PodDiseaseScreen() {
 
   const handleAnalysis = async (uri: string) => {
     setLoading(true);
-    try { setResult(await predictPodDisease(uri)); }
+    try {
+      const data = await predictPodDisease(uri);
+      setResult(data);
+      await saveScanActivity({
+        type: "Pod Analysis",
+        resultTitle:
+          data.predicted_class === "not_a_cardamom_pod"
+            ? "Not a cardamom pod"
+            : data.disease_detected
+              ? data.predicted_class.replace(/_/g, " ")
+              : "Healthy",
+      });
+    }
     catch { Alert.alert("Error", "Failed to connect to the AI server."); }
     finally { setLoading(false); }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <ChevronLeft color="white" size={28} />
-        </TouchableOpacity>
-        <Text style={styles.navTitle}>Pod Disease Detection</Text>
-      </View>
+      <ScreenHeader
+        title="Pod Disease Detection"
+        subtitle="AI Diagnostics"
+        onBack={() => router.back()}
+      />
 
-      <ScrollView style={styles.body}>
+      <ScrollView
+        style={styles.body}
+        contentContainerStyle={styles.bodyContent}
+        showsVerticalScrollIndicator={false}
+      >
         {!image ? (
           <View style={styles.pickSection}>
-            <View style={styles.infoBox}>
-              <Info size={22} color="#064e3b" />
-              <Text style={styles.infoText}>Capture a clear, close-up image of a single cardamom pod. Ensure there is enough light and the pod is centred.</Text>
-            </View>
-            <TouchableOpacity onPress={() => pickImage(true)} style={styles.primaryPickBtn}>
-              <Camera size={44} color="white" />
+            <Card style={styles.infoBox}>
+              <IconTile size={40} tone="brand">
+                <Info size={19} color={colors.brand700} />
+              </IconTile>
+              <Text style={styles.infoText}>
+                Capture a clear, close-up image of a single cardamom pod. Make sure the
+                damaged area is visible and well lit.
+              </Text>
+            </Card>
+
+            <TouchableOpacity
+              onPress={() => pickImage(true)}
+              style={styles.primaryPickBtn}
+              activeOpacity={0.9}
+            >
+              <View style={styles.pickIconCircle}>
+                <Camera size={30} color={colors.white} />
+              </View>
               <Text style={styles.primaryPickLabel}>Open Camera</Text>
+              <Text style={styles.primaryPickHint}>Fastest way to scan in the field</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => pickImage(false)} style={styles.secondaryPickBtn}>
-              <ImageIcon size={30} color="#9ca3af" />
+
+            <TouchableOpacity
+              onPress={() => pickImage(false)}
+              style={styles.secondaryPickBtn}
+              activeOpacity={0.8}
+            >
+              <ImageIcon size={22} color={colors.muted} />
               <Text style={styles.secondaryPickLabel}>Upload from Gallery</Text>
             </TouchableOpacity>
+
+            <View style={styles.tipRow}>
+              {tips.map((tip) => (
+                <View key={tip.title} style={styles.tipCard}>
+                  <tip.icon size={16} color={colors.brand600} />
+                  <Text style={styles.tipTitle}>{tip.title}</Text>
+                  <Text style={styles.tipDesc}>{tip.desc}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         ) : (
           <View style={styles.resultSection}>
             <View style={styles.imageFrame}>
               <Image source={{ uri: image }} style={styles.previewImage} resizeMode="cover" />
-              <TouchableOpacity onPress={() => setImage(null)} style={styles.retakeBtn}>
-                <Text style={styles.retakeBtnText}>RETAKE</Text>
+              <TouchableOpacity
+                onPress={() => { setImage(null); setResult(null); }}
+                style={styles.retakeBtn}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.retakeBtnText}>Retake</Text>
               </TouchableOpacity>
-            </View>
 
-            {loading && (
-              <View style={styles.loadingBox}>
-                <ActivityIndicator size="large" color="#064e3b" />
-                <Text style={styles.loadingText}>AI Analyzing...</Text>
-              </View>
-            )}
+              {loading && (
+                <View style={styles.imageOverlay}>
+                  <ActivityIndicator size="large" color={colors.brand300} />
+                  <Text style={styles.overlayText}>Analyzing</Text>
+                </View>
+              )}
+            </View>
 
             {result && (
               <View style={styles.cards}>
-                <View style={[styles.statusCard, result.disease_detected ? styles.dangerCard : styles.successCard]}>
-                  <View>
-                    <Text style={styles.cardSubLabel}>Status</Text>
-                    <Text style={[styles.statusText, result.disease_detected ? { color: "#b91c1c" } : { color: "#047857" }]}>
-                      {result.disease_detected ? "Disease Detected" : "Healthy"}
+                {/* Status */}
+                <Card
+                  style={[
+                    styles.statusCard,
+                    isInvalidPod
+                      ? styles.warnCard
+                      : hasDisease
+                        ? styles.dangerCard
+                        : styles.successCard,
+                  ]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={[
+                        styles.cardSubLabel,
+                        isInvalidPod && { color: colors.warn700 },
+                      ]}
+                    >
+                      {isInvalidPod ? "Invalid Image" : "Status"}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.statusText,
+                        {
+                          color: isInvalidPod
+                            ? colors.warn800
+                            : hasDisease
+                              ? colors.danger700
+                              : colors.brand700,
+                        },
+                      ]}
+                    >
+                      {isInvalidPod
+                        ? "Not a Cardamom Pod"
+                        : hasDisease
+                          ? "Disease Detected"
+                          : "Healthy Pod"}
                     </Text>
                   </View>
-                  {result.disease_detected ? <ShieldAlert size={40} color="#dc2626" /> : <CheckCircle2 size={40} color="#059669" />}
-                </View>
+                  <IconTile
+                    size={52}
+                    tone={isInvalidPod ? "neutral" : hasDisease ? "danger" : "brand"}
+                    style={
+                      isInvalidPod
+                        ? { backgroundColor: colors.warn50, borderColor: colors.warn200 }
+                        : undefined
+                    }
+                  >
+                    {isInvalidPod ? (
+                      <AlertTriangle size={24} color={colors.warn} />
+                    ) : hasDisease ? (
+                      <ShieldAlert size={24} color={colors.danger} />
+                    ) : (
+                      <CheckCircle2 size={24} color={colors.brand600} />
+                    )}
+                  </IconTile>
+                </Card>
 
-                {result.predicted_class && (
-                  <View style={styles.detailCard}>
+                {/* Why the image was rejected */}
+                {isInvalidPod && result.message && (
+                  <Card>
+                    <Text style={styles.cardSubLabel}>What happened</Text>
+                    <Text style={styles.bodyText}>{result.message}</Text>
+                  </Card>
+                )}
+
+                {/* Finding + confidence — hidden for a rejected image, where the
+                    percentage is the image-gate score, not a disease confidence. */}
+                {result.predicted_class && !isInvalidPod && (
+                  <Card>
                     <Text style={styles.cardSubLabel}>Finding</Text>
-                    <Text style={styles.detailTitle}>{result.predicted_class.replace(/_/g, " ")}</Text>
-                    <Text style={styles.confidence}>Confidence: <Text style={styles.confidenceValue}>{result.confidence_percent?.toFixed(1)}%</Text></Text>
+                    <Text style={styles.detailTitle}>
+                      {result.predicted_class.replace(/_/g, " ")}
+                    </Text>
+
+                    <View style={styles.confidenceRow}>
+                      <Text style={styles.confidenceLabel}>Confidence</Text>
+                      <Text style={styles.confidenceValue}>
+                        {result.confidence_percent?.toFixed(1)}%
+                      </Text>
+                    </View>
+                    <ProgressBar value={result.confidence_percent ?? 0} />
+                  </Card>
+                )}
+
+                {/* Recommendation */}
+                {result.recommendation && (
+                  <View style={styles.darkCard}>
+                    <View style={styles.darkHead}>
+                      <Text style={styles.darkCardLabel}>Recommendation</Text>
+                      {result.recommendation.risk_level && (
+                        <View
+                          style={[
+                            styles.riskPill,
+                            { backgroundColor: riskTone(result.recommendation.risk_level) },
+                          ]}
+                        >
+                          <Text style={styles.riskPillText}>
+                            {result.recommendation.risk_level} risk
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <Text style={styles.darkCardText}>
+                      {result.recommendation.farmer_action}
+                    </Text>
+
+                    {result.recommendation.organic_solutions?.length > 0 && (
+                      <View style={styles.solutionsList}>
+                        <Text style={styles.solutionsLabel}>Organic Solutions</Text>
+                        {result.recommendation.organic_solutions.map(
+                          (solution: string, i: number) => (
+                            <View key={i} style={styles.solutionItem}>
+                              <View style={styles.solutionIndex}>
+                                <Text style={styles.solutionIndexText}>{i + 1}</Text>
+                              </View>
+                              <Text style={styles.solutionText}>{solution}</Text>
+                            </View>
+                          )
+                        )}
+                      </View>
+                    )}
+
+                    {result.recommendation.note && (
+                      <View style={styles.noteBox}>
+                        <Info size={14} color={colors.brand300} />
+                        <Text style={styles.noteText}>{result.recommendation.note}</Text>
+                      </View>
+                    )}
                   </View>
                 )}
 
-                {result.recommendation && (
-                  <View style={styles.darkCard}>
-                    <Text style={styles.darkCardLabel}>Recommendation</Text>
-                    <Text style={styles.darkCardText}>"{result.recommendation.farmer_action}"</Text>
-                    <View style={styles.riskRow}>
-                      <Text style={styles.riskLabel}>RISK LEVEL: <Text style={styles.riskValue}>{result.recommendation.risk_level}</Text></Text>
-                    </View>
-                  </View>
+                {user && (
+                  <PrimaryButton
+                    label="Save to Profile"
+                    tone="dark"
+                    loading={isSaving}
+                    onPress={handleSave}
+                    icon={<Save size={17} color={colors.white} />}
+                  />
                 )}
               </View>
             )}
           </View>
         )}
-        <View style={{ height: 80 }} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  navBar: { backgroundColor: "#064e3b", paddingTop: 52, paddingBottom: 20, paddingHorizontal: 24, flexDirection: "row", alignItems: "center" },
-  backBtn: { marginRight: 16 },
-  navTitle: { color: "#fff", fontSize: 18, fontWeight: "900", letterSpacing: -0.5, textTransform: "uppercase" },
-  body: { flex: 1, paddingHorizontal: 24, paddingTop: 24 },
-  pickSection: { gap: 16 },
-  infoBox: { flexDirection: "row", gap: 12, backgroundColor: "#f0fdf4", padding: 16, borderWidth: 1, borderColor: "#d1fae5", alignItems: "flex-start" },
-  infoText: { flex: 1, color: "#064e3b", fontSize: 13, lineHeight: 20, fontWeight: "500" },
-  primaryPickBtn: { backgroundColor: "#064e3b", paddingVertical: 48, alignItems: "center", gap: 12 },
-  primaryPickLabel: { color: "#fff", fontWeight: "900", fontSize: 13, letterSpacing: 2, textTransform: "uppercase" },
-  secondaryPickBtn: { borderWidth: 2, borderColor: "#d1d5db", borderStyle: "dashed", paddingVertical: 40, alignItems: "center", gap: 10 },
-  secondaryPickLabel: { color: "#9ca3af", fontWeight: "700", fontSize: 11, letterSpacing: 2, textTransform: "uppercase" },
-  resultSection: { gap: 20 },
-  imageFrame: { borderWidth: 1, borderColor: "#e5e7eb", padding: 8, position: "relative" },
+  container: { flex: 1, backgroundColor: colors.surface },
+  body: { flex: 1 },
+  bodyContent: { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+
+  /* Picker */
+  pickSection: { gap: 14 },
+  infoBox: { flexDirection: "row", alignItems: "center", gap: 14 },
+  infoText: { flex: 1, ...t.body, fontSize: 13 },
+  primaryPickBtn: {
+    backgroundColor: colors.brand900,
+    borderRadius: radius.xxl,
+    paddingVertical: 36,
+    alignItems: "center",
+    gap: 6,
+    ...shadow.card,
+  },
+  pickIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,255,255,0.13)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  primaryPickLabel: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 15,
+    letterSpacing: 0.4,
+  },
+  primaryPickHint: { color: colors.brand300, fontSize: 12, fontWeight: "500" },
+  secondaryPickBtn: {
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderStyle: "dashed",
+    borderRadius: radius.xl,
+    backgroundColor: colors.white,
+    paddingVertical: 22,
+    alignItems: "center",
+    gap: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  secondaryPickLabel: { color: colors.inkSoft, fontWeight: "700", fontSize: 13.5 },
+
+  tipRow: { flexDirection: "row", gap: 10, marginTop: 4 },
+  tipCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 12,
+    gap: 4,
+  },
+  tipTitle: { fontSize: 12, fontWeight: "800", color: colors.ink, marginTop: 4 },
+  tipDesc: { fontSize: 10.5, color: colors.muted, lineHeight: 14 },
+
+  /* Results */
+  resultSection: { gap: 16 },
+  imageFrame: {
+    borderRadius: radius.xxl,
+    overflow: "hidden",
+    backgroundColor: colors.white,
+    ...shadow.card,
+  },
   previewImage: { width: "100%", height: 300 },
-  retakeBtn: { position: "absolute", top: 20, right: 20, backgroundColor: "#dc2626", paddingHorizontal: 12, paddingVertical: 6 },
-  retakeBtnText: { color: "#fff", fontWeight: "700", fontSize: 11 },
-  loadingBox: { alignItems: "center", paddingVertical: 40, gap: 16 },
-  loadingText: { color: "#064e3b", fontWeight: "900", letterSpacing: 2, textTransform: "uppercase" },
-  cards: { gap: 16 },
-  statusCard: { padding: 24, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  dangerCard: { backgroundColor: "#fef2f2", borderWidth: 1, borderColor: "#fecaca" },
-  successCard: { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0" },
-  cardSubLabel: { fontSize: 10, fontWeight: "700", color: "#6b7280", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 },
-  statusText: { fontSize: 22, fontWeight: "900", textTransform: "uppercase" },
-  detailCard: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#e5e7eb", padding: 24 },
-  detailTitle: { fontSize: 20, fontWeight: "900", color: "#111827", textTransform: "uppercase", marginBottom: 12 },
-  confidence: { fontSize: 13, fontWeight: "700", color: "#6b7280" },
-  confidenceValue: { color: "#064e3b", fontWeight: "900" },
-  darkCard: { backgroundColor: "#111827", padding: 24 },
-  darkCardLabel: { color: "#10b981", fontSize: 10, fontWeight: "900", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 },
-  darkCardText: { color: "#fff", fontWeight: "500", fontStyle: "italic", lineHeight: 22, marginBottom: 16 },
-  riskRow: { borderTopWidth: 1, borderTopColor: "#374151", paddingTop: 12 },
-  riskLabel: { color: "#9ca3af", fontSize: 11, fontWeight: "700" },
-  riskValue: { color: "#10b981" },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(2,44,34,0.72)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  overlayText: {
+    color: colors.white,
+    fontWeight: "800",
+    fontSize: 12,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+  },
+  retakeBtn: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+  },
+  retakeBtnText: { color: colors.ink, fontWeight: "800", fontSize: 11.5 },
+
+  cards: { gap: 14 },
+  statusCard: { flexDirection: "row", alignItems: "center", gap: 14, borderWidth: 1.5 },
+  dangerCard: { backgroundColor: colors.danger50, borderColor: colors.danger200 },
+  successCard: { backgroundColor: colors.brand50, borderColor: colors.brand200 },
+  warnCard: { backgroundColor: colors.warn50, borderColor: colors.warn200 },
+  cardSubLabel: { ...t.eyebrow, marginBottom: 6 },
+  statusText: { fontSize: 20, fontWeight: "800", letterSpacing: -0.4 },
+  bodyText: { ...t.body },
+
+  detailTitle: {
+    fontSize: 19,
+    fontWeight: "800",
+    color: colors.ink,
+    letterSpacing: -0.4,
+    textTransform: "capitalize",
+    marginBottom: 16,
+  },
+  confidenceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 8,
+  },
+  confidenceLabel: { ...t.eyebrow },
+  confidenceValue: { fontSize: 20, fontWeight: "800", color: colors.brand700 },
+
+  darkCard: {
+    backgroundColor: colors.brand950,
+    borderRadius: radius.xl,
+    padding: 20,
+    ...shadow.card,
+  },
+  darkHead: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  darkCardLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  riskPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill },
+  riskPillText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  darkCardText: { color: colors.white, fontWeight: "500", lineHeight: 21, fontSize: 13.5 },
+
+  solutionsList: { marginTop: 18 },
+  solutionsLabel: {
+    color: colors.brand300,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    marginBottom: 10,
+  },
+  solutionItem: { flexDirection: "row", alignItems: "flex-start", marginBottom: 9, gap: 10 },
+  solutionIndex: {
+    width: 20,
+    height: 20,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(16,185,129,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  solutionIndexText: { color: colors.brand300, fontSize: 10, fontWeight: "800" },
+  solutionText: { color: "#d1d5db", fontSize: 12.5, lineHeight: 19, flex: 1 },
+
+  noteBox: {
+    flexDirection: "row",
+    gap: 9,
+    backgroundColor: "rgba(16,185,129,0.1)",
+    padding: 13,
+    borderRadius: radius.md,
+    marginTop: 16,
+    alignItems: "flex-start",
+  },
+  noteText: { color: colors.brand200, fontSize: 11.5, flex: 1, lineHeight: 17 },
 });
