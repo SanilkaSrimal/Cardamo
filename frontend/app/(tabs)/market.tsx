@@ -243,7 +243,6 @@ export default function MarketScreen() {
                 { label: "Fresh Price (LKR)", key: "current_fresh_price_lkr_per_kg" },
                 { label: "Drying Cost (LKR)", key: "drying_cost_total_lkr" },
                 { label: "Storage Cost (LKR)", key: "storage_cost_total_lkr" },
-                { label: "Conversion Ratio", key: "conversion_ratio" },
               ].map(({ label, key }) => (
                 <View key={key} style={styles.fieldItem}>
                   <Text style={styles.formLabel}>{label}</Text>
