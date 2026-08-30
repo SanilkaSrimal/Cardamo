@@ -141,7 +141,7 @@ export default function DashboardOverview() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  {["Date", "Fresh Price (LKR/kg)", "Drying Cost (LKR)", "Storage Cost (LKR)", "Conv. Ratio"].map(
+                  {["Date", "Fresh Price (LKR/kg)", "Drying Cost (LKR)", "Storage Cost (LKR)"].map(
                     (h) => (
                       <th
                         key={h}
@@ -174,7 +174,7 @@ export default function DashboardOverview() {
                     <td className="px-4 py-3 text-gray-700">
                       Rs. {r.storage_cost_total_lkr.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{r.conversion_ratio}</td>
+                    {/* conversion_ratio column hidden */}
                   </tr>
                 ))}
               </tbody>

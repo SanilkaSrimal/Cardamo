@@ -182,41 +182,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-950/70 via-transparent to-transparent" />
               </div>
 
-              {/* Floating diagnostic chip */}
-              <div className="absolute -left-4 sm:-left-8 top-10 w-56 rounded-2xl bg-white p-4 shadow-lift animate-float">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
-                    <ShieldCheck size={17} />
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400">
-                      Pod status
-                    </p>
-                    <p className="text-sm font-bold text-brand-700">Healthy pod</p>
-                  </div>
-                </div>
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                  <div className="h-full w-[97%] rounded-full bg-brand-500" />
-                </div>
-                <p className="mt-2 text-[11px] text-gray-500">97% confidence</p>
-              </div>
 
-              {/* Floating price chip */}
-              <div
-                className="absolute -right-2 sm:-right-6 bottom-12 w-56 rounded-2xl bg-white p-4 shadow-lift animate-float"
-                style={{ animationDelay: "1.5s" }}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400">
-                    Dried price · 4w
-                  </p>
-                  <TrendingUp size={14} className="text-brand-600" />
-                </div>
-                <p className="mt-1.5 text-xl font-bold text-gray-900">Rs. 20,554</p>
-                <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-bold text-brand-700">
-                  ▲ 0.70% vs today
-                </p>
-              </div>
             </div>
           </div>
         </div>

@@ -127,6 +127,7 @@ export default function Grading() {
                 <div className="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
                   <AlertTriangle className="mt-0.5 shrink-0" size={20} />
                   <p className="font-semibold">{error}</p>
+                  
                 </div>
               )}
 
@@ -390,6 +391,7 @@ export default function Grading() {
                     <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                       Avg. price lift
                     </p>
+                    
                   </div>
                 </div>
               </div>
@@ -434,6 +436,7 @@ export default function Grading() {
       </section>
 
       <FaqSection items={gradingFaqs} eyebrow="Grading & certification" />
+     
       <CtaSection />
     </div>
   );

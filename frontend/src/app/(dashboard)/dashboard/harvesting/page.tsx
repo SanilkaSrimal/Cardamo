@@ -190,13 +190,7 @@ function HarvestingModal({
               onChange={handleChange}
               hint="Default: 2.5%"
             />
-            <FormField
-              label="Conversion Ratio"
-              name="conversion_ratio"
-              value={form.conversion_ratio}
-              onChange={handleChange}
-              hint="Fresh→Dry ratio, default: 4.0"
-            />
+            {/* Conversion ratio hidden – uses default value of 4.0 */}
           </div>
 
           <FormField
@@ -441,7 +435,7 @@ export default function HarvestingPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  {["Date", "Fresh Price", "Drying Cost", "Storage Cost", "Quality Loss", "Conv. Ratio", "Harvest (kg)", "Notes", ""].map(
+                  {["Date", "Fresh Price", "Drying Cost", "Storage Cost", "Quality Loss", "Harvest (kg)", "Notes", ""].map(
                     (h) => (
                       <th
                         key={h}
@@ -472,7 +466,7 @@ export default function HarvestingPage() {
                       Rs. {r.storage_cost_total_lkr.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-gray-700">{r.quality_loss_pct_est}%</td>
-                    <td className="px-4 py-3 text-gray-700">{r.conversion_ratio}</td>
+                    {/* conversion_ratio column hidden */}
                     <td className="px-4 py-3 text-gray-700">
                       {r.harvest_fresh_kg ? `${r.harvest_fresh_kg} kg` : "—"}
                     </td>

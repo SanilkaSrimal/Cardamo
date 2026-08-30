@@ -59,6 +59,8 @@ const steps = [
   },
 ];
 
+const todayStr = new Date().toISOString().split('T')[0];
+
 const inputClass =
   "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition-colors focus:border-brand-500 focus:ring-4 focus:ring-brand-100";
 const labelClass =
@@ -165,6 +167,7 @@ export default function MarketPrediction() {
                         type="date"
                         className={inputClass}
                         value={priceForm.date}
+                        min={todayStr}
                         onChange={(e) => setPriceForm({...priceForm, date: e.target.value})}
                       />
                     </div>
@@ -307,6 +310,7 @@ export default function MarketPrediction() {
                         type="date"
                         className={inputClass}
                         value={recommendForm.date}
+                        min={todayStr}
                         onChange={(e) => setRecommendForm({...recommendForm, date: e.target.value})}
                       />
                     </div>
@@ -370,16 +374,7 @@ export default function MarketPrediction() {
                       />
                     </div>
 
-                    <div>
-                      <label className={labelClass}>Conversion Ratio (Fresh:Dried)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        className={inputClass}
-                        value={recommendForm.conversion_ratio}
-                        onChange={(e) => setRecommendForm({...recommendForm, conversion_ratio: Number(e.target.value)})}
-                      />
-                    </div>
+                    {/* Conversion ratio hidden – uses default value of 4.0 */}
                   </div>
 
                   <button

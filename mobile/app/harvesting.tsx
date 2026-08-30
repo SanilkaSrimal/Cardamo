@@ -247,8 +247,7 @@ export default function HarvestingScreen() {
             <Text style={styles.inputLabel}>Quality Loss (%)</Text>
             <TextInput style={styles.input} value={form.quality_loss_pct_est} onChangeText={(t) => setForm({...form, quality_loss_pct_est: t})} keyboardType="numeric" />
             
-            <Text style={styles.inputLabel}>Conversion Ratio</Text>
-            <TextInput style={styles.input} value={form.conversion_ratio} onChangeText={(t) => setForm({...form, conversion_ratio: t})} keyboardType="numeric" />
+            {/* Conversion ratio hidden – uses default value of 4.0 */}
             
             <Text style={styles.inputLabel}>Notes</Text>
             <TextInput style={[styles.input, { height: 80, textAlignVertical: "top" }]} value={form.notes} onChangeText={(t) => setForm({...form, notes: t})} multiline />
