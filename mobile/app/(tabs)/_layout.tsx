@@ -12,7 +12,7 @@ function TabIcon({
   focused,
 }: {
   icon: React.ElementType;
-  color: string;
+  color: any;
   focused: boolean;
 }) {
   return (
