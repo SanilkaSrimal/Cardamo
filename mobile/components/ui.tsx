@@ -30,7 +30,7 @@ export function MeshBackdrop({ style }: { style?: StyleProp<ViewStyle> }) {
 }
 
 const mesh = StyleSheet.create({
-  base: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.brand950 },
+  base: { ...StyleSheet.absoluteFill, backgroundColor: colors.brand950 },
   blob: { position: "absolute", borderRadius: radius.pill },
   blobA: {
     width: 260,
